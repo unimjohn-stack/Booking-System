@@ -27,4 +27,27 @@ export const registerUser = async (req, res) => {
         console.error("Error in registerUser controller:", error.message );
         return res.status(500).json({  success: false, message: "Internal Server Error", });
     }
+};
+
+export const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password ) {
+            return res.status(400).json({ message: "All fields required" });
+        }
+        const normalizedEmail = email.toLowerCase().trim();
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
+            return res.status(404).json({ message: "Invalid credentials" });
+
+        }
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+        return res.status(200).json({ success: true, message: "You have logged In successfully", });
+    } catch(error) {
+        console.error("Error in loginUser:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
 }
