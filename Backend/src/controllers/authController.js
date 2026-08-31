@@ -6,7 +6,7 @@ import Business from '../models/businessModel.js';
 export const registerUser = async (req, res) => {
     try {
         const { fullName, email, phone, password, businessName, category } = req.body;
-        if (!fullName || !email || !phone || !password || !businessName) {
+        if (!fullName || !email || !phone || !password || !businessName || !category) {
             return res.status(400).json({ message: "All fields required"});
         }
         const normalizedEmail = email.toLowerCase().trim();
@@ -39,12 +39,15 @@ export const loginUser = async (req, res) => {
         const normalizedEmail = email.toLowerCase().trim();
         const user = await User.findOne({ email: normalizedEmail });
         if (!user) {
-            return res.status(404).json({ message: "Invalid credentials" });
+            return res.status(401).json({ message: "Invalid credentials" });
 
         }
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
+        }
+        if (!user.isActive) {
+            return res.status(403).json({ message: "Account is inactive" });
         }
         const token = generateToken(user._id);
         setCookie(res, token);
@@ -54,3 +57,15 @@ export const loginUser = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const logoutUser = async (req, res) => {
+    try {
+        // res.cookie("token", "", { maxAge: 0 });
+        res.clearCookie("token");
+        return res.status(200).json({ success: true, message: "Logged Out Successfully" });
+    } catch (error) {
+        console.error("Error in logoutUser controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
