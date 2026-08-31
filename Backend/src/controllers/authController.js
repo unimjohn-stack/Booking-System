@@ -44,7 +44,7 @@ export const loginUser = async (req, res) => {
         }
         const passwordMatch = await bcrypt.compare(password, user.password);
         if (!passwordMatch) {
-            return res.status(400).json({ message: "Invalid credentials" });
+            return res.status(401).json({ message: "Invalid credentials" });
         }
         if (!user.isActive) {
             return res.status(403).json({ message: "Account is inactive" });
