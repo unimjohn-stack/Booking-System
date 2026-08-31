@@ -1,5 +1,6 @@
 import User from '../models/userModel.js';
 import bcrypt from "bcrypt";
+import {generateToken, setCookie} from '../utils/generateToken.js';
 import Business from '../models/businessModel.js';
 
 export const registerUser = async (req, res) => {
@@ -45,6 +46,8 @@ export const loginUser = async (req, res) => {
         if (!passwordMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
+        const token = generateToken(user._id);
+        setCookie(res, token);
         return res.status(200).json({ success: true, message: "You have logged In successfully", });
     } catch(error) {
         console.error("Error in loginUser:", error.message);
