@@ -26,3 +26,17 @@ export const getAllBusinesses = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const updateBusiness = async (req, res) => {
+    try {
+        const { name, description, email, category, phone, address, logo, timezone } = req.body;
+        const business = await Business.findOneAndUpdate({ _id: req.params.id, owner: req.user._id, }, { name, description, email, category, phone, address, logo, timezone }, { new: true, runValidators: true, });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        return res.status(200).json({ success: true, message: "Business updated successfully", business });
+    } catch(error) {
+        console.error("Error in updateBusiness Controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
