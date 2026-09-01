@@ -1,3 +1,4 @@
+import { retry } from "@reduxjs/toolkit/query";
 import Business from "../models/businessModel.js";
 
 export const getMyBusiness = async (req, res) => {
@@ -37,6 +38,24 @@ export const updateBusiness = async (req, res) => {
         return res.status(200).json({ success: true, message: "Business updated successfully", business });
     } catch(error) {
         console.error("Error in updateBusiness Controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const deactivateBusiness = async (req, res) => {
+    try {
+        const business = await Business.findOne({ owner: req.user._id});
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        if (business.isActive !== true) {
+            return res.status(403).json({ message: "Business already deactivated"});
+        }
+        business.isActive = false;
+        await business.save();
+        return res.status(200).json({ success: true, message: "Business deactivated  successfully", });
+    } catch (error) {
+        console.error("Error in deactivateBusiness Controller:", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
