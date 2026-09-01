@@ -3,12 +3,16 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import connectDB from './config/db.js';
 
+import authRoutes from './routes/authRoutes.js'
+
 dotenv.config();
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/api/auth', authRoutes);
 
 app.get('/health', (req, res) => {
     res.send("...Unim's API IS RUNNING");
