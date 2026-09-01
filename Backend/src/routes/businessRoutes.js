@@ -5,8 +5,8 @@ import { deactivateBusiness, getAllBusinesses, getMyBusiness, updateBusiness } f
 const router = express.Router();
 
 router.get('/', protectRoute, getAllBusinesses);
-router.get('/:id', protectRoute, getMyBusiness);
+router.get('/my', protectRoute, getMyBusiness);
+router.patch('/deactivate', protectRoute, deactivateBusiness);
 router.patch('/:id', protectRoute, updateBusiness);
-router.patch('/:id', protectRoute, deactivateBusiness);
 
 export default router;
