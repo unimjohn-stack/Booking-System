@@ -107,3 +107,25 @@ export const deleteService = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const deactivateService = async (req, res) => {
+    try {
+        const business = await Business.findOne({ owner: req.user._id });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        const service = await Service.findOne({ _id: req.params.id, business: business._id });
+        if (!service) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+        if (service.isActive !== true) {
+            return res.status(400).json({ message: "This service is deactivated already" });
+        }
+        service.isActive = false;
+        await service.save();
+        return res.status(200).json({ success: true, message: "Service deactivated successfully", service })
+    } catch (error) {
+        console.error("Error in deactivateService Controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
