@@ -5,6 +5,7 @@ import connectDB from './config/db.js';
 
 import authRoutes from './routes/authRoutes.js';
 import businessRoutes from './routes/businessRoutes.js';
+import serviceRoutes from './routes/serviceRoute.js';
 
 dotenv.config();
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/business', businessRoutes);
+app.use('/api/service', serviceRoutes);
 
 app.get('/health', (req, res) => {
     res.send("...Unim's API IS RUNNING");
