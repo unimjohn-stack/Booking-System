@@ -45,13 +45,13 @@ export const getMyService = async (req, res) => {
         if (!business) {
             return res.status(404).json({ message: "Business not found" });
         }
-        const service = await Service.findOne( req.params.id);
+        const service = await Service.findOne({ _id: req.params.id, business: business._id });
         if (!service) {
             return res.status(404).json({ message: "Service not found" });
         }
-        if (service.business._id !== business._id) {
-            return res.status(403).json({ message: "This service does not belong to your business" });
-        }
+        // if (service.business._id !== business._id) {
+        //     return res.status(403).json({ message: "This service does not belong to your business" });
+        // }
         return res.status(200).json({ succss: true, message: "Service found successfully", service, });
     } catch (error) {
         console.error("Error in getMyService Controller", error.message);
