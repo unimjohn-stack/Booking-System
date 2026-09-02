@@ -38,3 +38,16 @@ export const getMyServices = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const getService = async (req, res) => {
+    try {
+        const service = await Service.findById(req.params.id);
+        if (!service) {
+            return res.status(404).json({ message: "Services not found" });
+        }
+        return res.status(200).json({ success: true, message: "Service found successfully", service, });
+    } catch (error) {
+        console.error("Error in getService Controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
