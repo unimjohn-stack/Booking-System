@@ -71,3 +71,21 @@ export const getService = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const updateService = async (req, res) => {
+    try {
+        const { name, description, price, duration } = req.body;
+        const business = await Business.findOne({ owner: req.user._id });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        const service = await Service.findOneAndUpdate({ _id: req.params.id, business: business._id, }, { name, description, price, duration }, { new: true, runValidators: true })
+        if (!service) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+        return res.status(200).json({ success: true, message: "Service Updated Successfully", service });
+    } catch(error) {
+        console.error("Error in updateService Controller:", error.message );
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
