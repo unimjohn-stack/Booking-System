@@ -86,3 +86,16 @@ export const getMyBusinessBooking = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const getMyBookings = async (req, res) => {
+    try {
+        const bookings = await Booking.find({ customer: req.user._id });
+        if (bookings.length === 0) {
+            return res.status(200).json({ success: true, message: "No Bookings Yet", bookings: [], });
+        }
+        return res.status(200).json({ success: true, message: "Bookings found successfully", bookings})
+    } catch (error) {
+        console.error("Error in getMyBookings Controller:", error.message );
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
