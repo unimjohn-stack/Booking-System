@@ -89,7 +89,9 @@ export const getMyBusinessBooking = async (req, res) => {
 
 export const getMyBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find({ customer: req.user._id });
+        const {phone} = req.query; 
+        const customer = await Customer.findOne({ phone }); 
+        const bookings = await Booking.find({ customer: customer._id });
         if (bookings.length === 0) {
             return res.status(200).json({ success: true, message: "No Bookings Yet", bookings: [], });
         }
