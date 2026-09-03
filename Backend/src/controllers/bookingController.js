@@ -75,7 +75,7 @@ export const getMyBusinessBooking = async (req, res) => {
         if (!business) {
             return res.status(404).json({ message: "Business not found" });
         }
-        const booking = await Booking.findById({ _id: req.params.id , business: business._id });
+        const booking = await Booking.findOne({ _id: req.params.id , business: business._id });
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
         }
@@ -91,6 +91,9 @@ export const getMyBookings = async (req, res) => {
     try {
         const {phone} = req.query; 
         const customer = await Customer.findOne({ phone }); 
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
         const bookings = await Booking.find({ customer: customer._id });
         if (bookings.length === 0) {
             return res.status(200).json({ success: true, message: "No Bookings Yet", bookings: [], });
@@ -98,6 +101,24 @@ export const getMyBookings = async (req, res) => {
         return res.status(200).json({ success: true, message: "Bookings found successfully", bookings})
     } catch (error) {
         console.error("Error in getMyBookings Controller:", error.message );
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const getMyBooking = async (req, res) => {
+    try {
+        const { phone } = req.query;
+        const customer = await Customer.findOne({ phone });
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        const booking = await  Booking.findOne({ _id: req.params.id, customer: customer._id, });
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        return res.status(200).json({ success: true, message: "Booking found successfully", booking });
+    } catch (error) {
+        console.error("Error in getMyBooking Controller:", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
