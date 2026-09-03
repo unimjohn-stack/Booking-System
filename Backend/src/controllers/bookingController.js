@@ -122,3 +122,48 @@ export const getMyBooking = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const updateBooking = async (req, res) => {
+    try {
+        const { phone } = req.query;
+        const { date, startTime } = req.body;
+        if (!date || !startTime) {
+            return res.status(400).json({ message: "Date and start time are required" });
+        }
+        const customer = await Customer.findOne({ phone });
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        const booking = await Booking.findOne({ _id: req.params.id, customer: customer._id, });
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        const service = await Service.findById(booking.service);
+        if (!service) {
+            return res.status(404).json({ message: "Service not found" });
+        }
+        const [hours, minutes] = startTime.split(":");
+        const start = new Date();
+        start.setHours(Number(hours), Number(minutes), 0, 0);
+        start.setMinutes(start.getMinutes() + service.duration);
+        const endTime = `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`;
+        const conflictBooking = await Booking.findOne({
+            _id: { $ne: booking._id },
+            business: booking.business,
+            date,
+            status: { $in: ["Pending", "Confirmed"] },
+            startTime: { $lt: endTime },
+            endTime: { $gt: startTime },
+        });
+        if (conflictBooking) {
+            return res.status(409).json({
+                message: "This time is already booked",
+            });
+        }
+        const newBooking = await Booking.findOneAndUpdate({ _id: req.params.id, customer: customer._id, }, { date, startTime, endTime }, { new: true, runValidators: true, });
+        return res.status(200).json({ success: true, message: "Booking updated successfully", newBooking, });
+    } catch (error) {
+        console.error("Error in updateBooking Controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
