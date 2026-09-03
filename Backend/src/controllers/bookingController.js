@@ -58,7 +58,7 @@ export const getMyBusinessBookings  = async (req, res) => {
         if (!business) {
             return res.status(404).json({ message: "Business not found" });
         }
-        const bookings = await Booking.find(businessId);
+        const bookings = await Booking.find({ business: business._id});
         if (bookings.length === 0) {
             return res.status(200).json({ success: true, message: "No Bookings Yet", bookings: [] });
         }
@@ -69,4 +69,20 @@ export const getMyBusinessBookings  = async (req, res) => {
     }
 }
 
+export const getMyBusinessBooking = async (req, res) => {
+    try {
+        const business = await Business.findOne({ owner: req.user._id });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        const booking = await Booking.findById({ _id: req.params.id , business: business._id });
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        return res.status(200).json({ success: true, message: "Booking found successfully", booking });
+    } catch (error) {
 
+        console.error("Error in getMyBusinessBooking Controller:", error.message );
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
