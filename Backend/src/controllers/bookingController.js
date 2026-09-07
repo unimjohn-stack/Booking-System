@@ -189,3 +189,25 @@ export const confirmBooking = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const completeBooking = async (req, res) => {
+    try {
+        const business = await Business.findOne({ owner: req.user._id });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        const booking = await Booking.findOne({ _id: req.params.id, business: business._id, });
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        if (booking.status !== "Confirmed") {
+            return res.status(409).json({ message: `This booking can not be completed because it is ${booking.status}` });
+        }
+        booking.status = "Completed";
+        await booking.save();
+        return res.status(200).json({ success: true, message: "Booking completed successfully", booking });
+    } catch(error) {
+        console.error("Error in completeBooking Controller:", error.message );
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
