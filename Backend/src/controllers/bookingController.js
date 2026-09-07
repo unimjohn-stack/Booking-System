@@ -149,7 +149,7 @@ export const updateBooking = async (req, res) => {
         const endTime = `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`;
         const conflictBooking = await Booking.findOne({
             _id: { $ne: booking._id },
-            business: booking.business,
+            business: booking.business, 
             date,
             status: { $in: ["Pending", "Confirmed"] },
             startTime: { $lt: endTime },
@@ -164,6 +164,28 @@ export const updateBooking = async (req, res) => {
         return res.status(200).json({ success: true, message: "Booking updated successfully", newBooking, });
     } catch (error) {
         console.error("Error in updateBooking Controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export const confirmBooking = async (req, res) => {
+    try {
+        const business = await Business.findOne({ owner: req.user._id });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        const booking = await Booking.findOne({ _id: req.params.id, business: business._id });
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        if (booking.status !== "Pending") {
+            return res.status(409).json({ message: `Booking can not be Confirmed because it is ${booking.status}`});
+        }
+        booking.status = "Confirmed";
+        await booking.save();
+        return res.status(200).json({ success: true, message: "Booking confirmed successfully", booking, });
+    } catch (error) {
+        console.error("Error in confirmBooking Controller:", error.message);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
