@@ -5,14 +5,14 @@ import { cancelBooking, completeBooking, confirmBooking, createBooking, getMyBoo
 const router = express.Router();
 
 router.post("/", createBooking);
-router.get("/my?phone", getMyBookings);
-router.get("/my/:id?phone=", getMyBooking)
-router.patch("/my/update/:id?phone=", updateBooking);
-router.patch("/my/cancel/:id?phone=", cancelBooking);
+router.get("/my", getMyBookings);
+router.get("/my/:id", getMyBooking);
+router.patch("/my/update/:id", updateBooking);
+router.patch("/my/cancel/:id", cancelBooking);
 
 router.get("/business", protectRoute, getMyBusinessBookings);
 router.get("/business/:id", protectRoute, getMyBusinessBooking);
-router.patch("/business/confirm/:id", protectRoute, confirmBooking);
-router.patch("/business/complete/:id", protectRoute, completeBooking);
+router.patch("/business/:id/confirm", protectRoute, confirmBooking);
+router.patch("/business/:id/complete", protectRoute, completeBooking);
 
 export default router;
