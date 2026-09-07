@@ -211,3 +211,26 @@ export const completeBooking = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const cancelBooking = async (req, res) => {
+    try {
+        const { phone } = req.query;
+        const customer = await Customer.findOne({ phone });
+        if (!customer) {
+            return res.status(404).json({ message: "Customer not found" });
+        }
+        const booking = await Booking.findOne({ _id: req.params.id, customer: customer._id });
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        if (!["Pending", "Confirmed"].includes(booking.status)) {
+            return res.status(409).json({ message: `This booking can not be cancelled because it is ${booking.status}` });
+        }
+        booking.status = "Cancelled";
+        await booking.save();
+        return res.status(200).json({ success: true, message: "Your booking has been cancelled" });
+    } catch (error) {
+        console.error("Error in cancelBooking Controller:", error.message );
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
