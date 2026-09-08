@@ -5,6 +5,6 @@ import { getMyCustomer, getMyCustomers } from '../controllers/bookingController.
 const router = express.Router();
 
 router.get("/", protectRoute, getMyCustomers);
-router.get("/", protectRoute, getMyCustomer);
+router.get("/:id", protectRoute, getMyCustomer);
 
 export default router;
