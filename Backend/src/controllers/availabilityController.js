@@ -41,3 +41,17 @@ export const createAvailability = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const getMyAvailability = async (req, res) => {
+    try {
+        const business = await Business.findOne({ owner: req.user._id });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        const availability = await Availability.find({ business: business._id });
+        return res.status(200).json({success: true, message: "Availability fetched successfully", availability, })
+    } catch (error) {
+        console.error("Error in getMyAvailability:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
