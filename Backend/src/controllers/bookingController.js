@@ -234,3 +234,20 @@ export const cancelBooking = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const getMyCustomers =  async (req, res) => {
+    try {
+        const business = await Business.findOne({ owner: req.user._id });
+        if (!business) {
+            return res.status(404).json({ message: "Business not found" });
+        }
+        const customer = await Customer.find({ business: business._id });
+        if (customer.length === 0) {
+            return res.status(200).json({ success: true, message: "No customers yet", customer: [], });
+        }
+        return res.status(200).json({ success: true, message: "Customers found successfully", customers });
+    } catch(error) {
+        console.error("Error in getMyCustomers Controller:", error.message);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
