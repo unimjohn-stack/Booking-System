@@ -55,3 +55,136 @@ export const getMyAvailability = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+export const updateAvailability = async (req, res) => {
+    try {
+        const { dayOfWeek, isAvailable, openTime, closeTime } = req.body;
+
+        const business = await Business.findOne({
+            owner: req.user._id
+        });
+
+        if (!business) {
+            return res.status(404).json({
+                message: "Business not found"
+            });
+        }
+
+        const availability = await Availability.findOne({
+            _id: req.params.id,
+            business: business._id
+        });
+
+        if (!availability) {
+            return res.status(404).json({
+                message: "Availability not found"
+            });
+        }
+
+        const updatedDay = dayOfWeek ?? availability.dayOfWeek;
+        const updatedIsAvailable = isAvailable ?? availability.isAvailable;
+        const updatedOpenTime = openTime ?? availability.openTime;
+        const updatedCloseTime = closeTime ?? availability.closeTime;
+
+
+        const validDays = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ];
+
+        if (!validDays.includes(updatedDay)) {
+            return res.status(400).json({
+                message: "A valid day of week is required"
+            });
+        }
+
+
+        if (typeof updatedIsAvailable !== "boolean") {
+            return res.status(400).json({
+                message: "isAvailable must be a boolean"
+            });
+        }
+
+
+        if (!updatedIsAvailable) {
+            availability.dayOfWeek = updatedDay;
+            availability.isAvailable = false;
+            availability.openTime = undefined;
+            availability.closeTime = undefined;
+
+            await availability.save();
+
+            return res.status(200).json({
+                success: true,
+                message: "Availability updated successfully",
+                availability
+            });
+        }
+
+        if (!updatedOpenTime || !updatedCloseTime) {
+            return res.status(400).json({
+                message: "Opening and closing time is required"
+            });
+        }
+
+        const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+        if (
+            !timeRegex.test(updatedOpenTime) ||
+            !timeRegex.test(updatedCloseTime)
+        ) {
+            return res.status(400).json({
+                message: "Time must be in HH:mm format"
+            });
+        }
+
+        if (updatedCloseTime <= updatedOpenTime) {
+            return res.status(400).json({
+                message: "Closing time must be after opening time"
+            });
+        }
+
+        
+        if (updatedDay !== availability.dayOfWeek) {
+            const existingAvailability = await Availability.findOne({
+                business: business._id,
+                dayOfWeek: updatedDay,
+                _id: { $ne: availability._id }
+            });
+
+            if (existingAvailability) {
+                return res.status(409).json({
+                    message: `Availability for ${updatedDay} already exists`
+                });
+            }
+        }
+
+        availability.dayOfWeek = updatedDay;
+        availability.isAvailable = updatedIsAvailable;
+        availability.openTime = updatedOpenTime;
+        availability.closeTime = updatedCloseTime;
+
+        await availability.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Availability updated successfully",
+            availability
+        });
+
+    } catch (error) {
+        console.error(
+            "Error in updateAvailability Controller:",
+            error.message
+        );
+
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+};
