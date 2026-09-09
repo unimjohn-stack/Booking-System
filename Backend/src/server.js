@@ -8,7 +8,8 @@ import businessRoutes from './routes/businessRoutes.js';
 import serviceRoutes from './routes/serviceRoute.js';
 import bookingRoutes from './routes/bookingRoutes.js';
 import customerRoutes from './routes/customerRoutes.js';
-import availabilityRoutes from './routes/availabiilityRoutes.js'
+import availabilityRoutes from './routes/availabiilityRoutes.js';
+import slotRoutes  from './routes/slotRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/service', serviceRoutes);
 app.use('/api/booking', bookingRoutes);
 app.use('/api/customer/', customerRoutes);
 app.use('/api/available/', availabilityRoutes);
+app.use('/api/slots/', slotRoutes);
 
 app.get('/health', (req, res) => {
     res.send("...Unim's API IS RUNNING");
