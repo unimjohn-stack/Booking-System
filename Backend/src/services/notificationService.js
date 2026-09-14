@@ -10,3 +10,6 @@ export const sendWhatsAppMessage = async (phone, message) => {
         throw new Error("Failed to send WhatsApp message");
     }
 }
+
+// populating .env
+// with whatsapp credentials
